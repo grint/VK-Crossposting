@@ -51,8 +51,6 @@ def read_logging_table(account_name):
     try:
         cursor.execute('''SELECT account, num_posts FROM update_log WHERE account=%s''', (account_name,))
         row = cursor.fetchone()
-        if cursor is not None:
-            cursor.close()
         return row
     except (Exception, psycopg2.DatabaseError) as error:
         print ("Error while reading PostgreSQL table:", error)
