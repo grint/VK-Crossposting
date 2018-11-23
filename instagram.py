@@ -60,7 +60,7 @@ def get_post_metadata(session: requests.Session, shortcode: str) -> Dict[str, An
 	return parse_page(session, "p/{0}/".format(shortcode), 'PostPage')["graphql"]["shortcode_media"]
 
 
-def get_new_posts(session: requests.Session, log_key: str, username: str, db_conn, db_cursor):
+def get_new_posts(session: requests.Session, log_key: str, username: str):
 	"""
 	Get the last posts, return new posts if they exist
 	"""
@@ -69,9 +69,9 @@ def get_new_posts(session: requests.Session, log_key: str, username: str, db_con
 	# Compare posts amount in the DB log
 	current_count = profile_metadata["edge_owner_to_timeline_media"]["count"]
 	try:
-		prev_count = db.read_update_table(db_conn, db_cursor, 'instagram_'+log_key)
+		prev_count = db.read_logging_table('instagram_'+log_key)
 		if prev_count is None:
-			db.upsert_update_table(db_conn, db_cursor, "instagram_{}".format(log_key), current_count)
+			db.upsert_logging_table("instagram_{}".format(log_key), current_count)
 			new_posts = 0
 		else:
 			prev_count = prev_count[1]
@@ -105,7 +105,7 @@ def get_post(session, post_data: Dict[str, Any]) -> Dict[str, Any]:
 	post['data']['author'] = names_dict[post_data['owner']['username']]
 	post['data']["shortcode"] = post_data["shortcode"]
 	post['data']["url"] = 'https://instagram.com/p/'+post_data["shortcode"]
-	post['data']["caption"] = post_data["edge_media_to_caption"]['edges'][0]['node']['text'] #.encode("UTF-8")
+	post['data']["caption"] = post_data["edge_media_to_caption"]['edges'][0]['node']['text']
 	post['data']["date"] = post_data["taken_at_timestamp"]
 	post['data']["media_urls"] = []
 
@@ -129,15 +129,15 @@ def get_post(session, post_data: Dict[str, Any]) -> Dict[str, Any]:
 	return post
 
 
-def check_instagram(db_conn, db_cursor):
+def check_instagram():
 	inst_session = create_session()
 
 	new_posts = {
-		'Sum_41': get_new_posts(inst_session, 'Sum_41', 'sum41', db_conn, db_cursor),
-		'Deryck': get_new_posts(inst_session, 'Deryck', 'deryckwhibley', db_conn, db_cursor),
-		'Dave': get_new_posts(inst_session, 'Dave', 'dave_brownsound', db_conn, db_cursor),
-		'Tom': get_new_posts(inst_session, 'Tom', 'dummyado', db_conn, db_cursor),
-		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin', db_conn, db_cursor)	
+		'Sum_41': get_new_posts(inst_session, 'Sum_41', 'sum41'),
+		'Deryck': get_new_posts(inst_session, 'Deryck', 'deryckwhibley'),
+		'Dave': get_new_posts(inst_session, 'Dave', 'dave_brownsound'),
+		'Tom': get_new_posts(inst_session, 'Tom', 'dummyado'),
+		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin')	
 	}
 
 	new_count = 0
@@ -146,9 +146,5 @@ def check_instagram(db_conn, db_cursor):
 		new_count += new_count_account
 		if new_count_account:
 			print('Found {} new {} post{}'.format(new_count_account, account, new_count>1 and 's' or ''))
-
-	# print('==================================')
-	# print(new_posts)
-	# print('==================================')
 
 	return new_count, new_posts
