@@ -27,6 +27,9 @@ def get_log_value(key: str):
 	Get value by key. 
 	:return requested value
 	"""
+	if not os.path.exists(log_filename):
+		with open(log_filename, 'w'): pass
+
 	with open(log_filename, 'r+') as input_file:
 		for line in input_file:
 			(db_key, db_value) = line.split()
@@ -39,6 +42,9 @@ def update_log_value(key: str, new_value: str):
 	"""
 	Rewrite value by key. 
 	"""
+	if not os.path.exists(log_filename):
+		with open(log_filename, 'w'): pass
+		
 	with open(log_filename, 'r+') as input_file, open(log_temp_filename, 'w') as output_file:
 		for line in input_file:
 			(db_key, db_value) = line.split()
