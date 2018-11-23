@@ -27,7 +27,7 @@ def get_log_value(key: str):
 	Get value by key. 
 	:return requested value
 	"""
-	with open('.update_log', 'r') as input_file:
+	with open(log_filename, 'r+') as input_file:
 		for line in input_file:
 			(db_key, db_value) = line.split()
 			if db_key == key:
