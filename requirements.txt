@@ -1,0 +1,13 @@
+beautifulsoup4==4.6.3
+certifi==2018.10.15
+chardet==3.0.4
+idna==2.7
+langdetect==1.0.7
+lxml==4.2.5
+py-translator==1.8.9
+python-slugify==1.2.6
+requests==2.20.1
+six==1.11.0
+Unidecode==1.0.23
+urllib3==1.24.1
+vk==2.0.2
