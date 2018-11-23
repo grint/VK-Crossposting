@@ -1,8 +1,6 @@
 # coding=utf8
 
-import log
-import requests
-import json
+import requests, json, db, sys
 from typing import Any, Dict, Iterator
 from bs4 import BeautifulSoup
 
@@ -62,20 +60,25 @@ def get_post_metadata(session: requests.Session, shortcode: str) -> Dict[str, An
 	return parse_page(session, "p/{0}/".format(shortcode), 'PostPage')["graphql"]["shortcode_media"]
 
 
-def get_new_posts(session: requests.Session, log_key: str, username: str):
+def get_new_posts(session: requests.Session, log_key: str, username: str, db_conn, db_cursor):
 	"""
 	Get the last posts, return new posts if they exist
 	"""
 	profile_metadata = get_profile_metadata(session, username)
 	
-	# Compare posts amount in the log
+	# Compare posts amount in the DB log
 	current_count = profile_metadata["edge_owner_to_timeline_media"]["count"]
 	try:
-		prev_count = int(log.get_log_value("instagram_"+log_key))
+		prev_count = db.read_update_table(db_conn, db_cursor, 'instagram_'+log_key)
+		if prev_count is None:
+			db.upsert_update_table(db_conn, db_cursor, "instagram_{}".format(log_key), current_count)
+			new_posts = 0
+		else:
+			prev_count = prev_count[1]
+			new_posts = current_count - prev_count
 	except TypeError as e:
-		print('Cannot read "update.log" vaue, check if values are correct')
-		raise TypeError
-	new_posts = current_count - prev_count
+		print('Cannot read DB value, check if values are correct:', e)
+		sys.exit()
 
 	posts = []
 	if new_posts:
@@ -126,15 +129,15 @@ def get_post(session, post_data: Dict[str, Any]) -> Dict[str, Any]:
 	return post
 
 
-def check_instagram(logger):
+def check_instagram(db_conn, db_cursor):
 	inst_session = create_session()
 
 	new_posts = {
-		'Sum_41': get_new_posts(inst_session, 'Sum_41', 'sum41'),
-		'Deryck': get_new_posts(inst_session, 'Deryck', 'deryckwhibley'),
-		'Dave': get_new_posts(inst_session, 'Dave', 'dave_brownsound'),
-		'Tom': get_new_posts(inst_session, 'Tom', 'dummyado'),
-		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin')	
+		'Sum_41': get_new_posts(inst_session, 'Sum_41', 'sum41', db_conn, db_cursor),
+		'Deryck': get_new_posts(inst_session, 'Deryck', 'deryckwhibley', db_conn, db_cursor),
+		'Dave': get_new_posts(inst_session, 'Dave', 'dave_brownsound', db_conn, db_cursor),
+		'Tom': get_new_posts(inst_session, 'Tom', 'dummyado', db_conn, db_cursor),
+		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin', db_conn, db_cursor)	
 	}
 
 	new_count = 0
@@ -142,7 +145,7 @@ def check_instagram(logger):
 		new_count_account = len(new_posts[account])
 		new_count += new_count_account
 		if new_count_account:
-			logger.info('Found {} new {} post{}'.format(new_count_account, account, new_count>1 and 's' or ''))
+			print('Found {} new {} post{}'.format(new_count_account, account, new_count>1 and 's' or ''))
 
 	# print('==================================')
 	# print(new_posts)

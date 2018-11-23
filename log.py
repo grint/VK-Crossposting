@@ -44,7 +44,7 @@ def update_log_value(key: str, new_value: str):
 	"""
 	if not os.path.exists(log_filename):
 		with open(log_filename, 'w'): pass
-		
+
 	with open(log_filename, 'r+') as input_file, open(log_temp_filename, 'w') as output_file:
 		for line in input_file:
 			(db_key, db_value) = line.split()
