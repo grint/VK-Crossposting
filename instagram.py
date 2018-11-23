@@ -137,7 +137,8 @@ def check_instagram():
 		'Deryck': get_new_posts(inst_session, 'Deryck', 'deryckwhibley'),
 		'Dave': get_new_posts(inst_session, 'Dave', 'dave_brownsound'),
 		'Tom': get_new_posts(inst_session, 'Tom', 'dummyado'),
-		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin')	
+		'Cone': get_new_posts(inst_session, 'Cone', 'officialconemccaslin'),
+		'Frank': get_new_posts(inst_session, 'Frank', 'frankzummo')
 	}
 
 	new_count = 0
