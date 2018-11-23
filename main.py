@@ -27,8 +27,5 @@ def inst_to_vk(count, posts):
 
 
 if __name__ == "__main__":
-	# inst_count, inst_posts = inst.check_instagram(logger)
-	# inst_to_vk(inst_count, inst_posts)
-
-	print(os.environ['VK_CROSSPOSTING_GROUP_ID'])
-	
+	inst_count, inst_posts = inst.check_instagram(logger)
+	inst_to_vk(inst_count, inst_posts)

@@ -1,12 +1,14 @@
 #coding=utf8
 
-import sys, requests, json, vk
+import sys, requests, json, vk, os
 from urllib.request import urlopen
 from urllib.error import URLError
 # from googletrans import Translator
 from py_translator import Translator
 
+is_prod = (os.environ.get('IS_HEROKU',  None) == 'True')
 config = os.environ
+
 
 def create_session():
 	'''
