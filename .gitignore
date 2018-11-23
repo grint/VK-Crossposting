@@ -1,7 +1,6 @@
 __pycache__/
 _notes/
 config.py
-.update_log
 .info.log
 venv/
 .DS_Store

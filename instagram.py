@@ -70,7 +70,11 @@ def get_new_posts(session: requests.Session, log_key: str, username: str):
 	
 	# Compare posts amount in the log
 	current_count = profile_metadata["edge_owner_to_timeline_media"]["count"]
-	prev_count = int(log.get_log_value("instagram_"+log_key))
+	try:
+		prev_count = int(log.get_log_value("instagram_"+log_key))
+	except TypeError as e:
+		print('Cannot read "update.log" vaue, check if values are correct')
+		raise TypeError
 	new_posts = current_count - prev_count
 
 	posts = []
