@@ -28,17 +28,17 @@ def connect_db():
 
 def create_logging_table():
     try:
-        create_table_query = '''CREATE TABLE IF NOT EXISTS update_log (account text PRIMARY KEY, num_posts int)'''
+        create_table_query = '''CREATE TABLE IF NOT EXISTS update_log (account text PRIMARY KEY, check_val text)'''
         cursor.execute(create_table_query)
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print ("Error while creating PostgreSQL table:", error)
 
 
-def upsert_logging_table(account, num_posts):
+def upsert_logging_table(account, check_val):
     try:
-        sql_insert_query = '''INSERT INTO update_log(account, num_posts) VALUES (%s, %s) ON CONFLICT (account) DO UPDATE SET num_posts = EXCLUDED.num_posts;'''
-        cursor.execute(sql_insert_query, (account,num_posts))
+        sql_insert_query = '''INSERT INTO update_log(account, check_val) VALUES (%s, %s) ON CONFLICT (account) DO UPDATE SET check_val = EXCLUDED.check_val;'''
+        cursor.execute(sql_insert_query, (account,check_val))
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print ("Error while inserting to PostgreSQL table:", error)
@@ -49,7 +49,7 @@ def read_logging_table(account_name):
     return tuple (account, post_num)
     '''
     try:
-        cursor.execute('''SELECT account, num_posts FROM update_log WHERE account=%s''', (account_name,))
+        cursor.execute('''SELECT account, check_val FROM update_log WHERE account=%s''', (account_name,))
         row = cursor.fetchone()
         return row
     except (Exception, psycopg2.DatabaseError) as error:

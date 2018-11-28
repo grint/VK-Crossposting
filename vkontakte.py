@@ -25,33 +25,39 @@ def make_post(session, post_type, post_data):
 	Make a VK post according to its type
 	'''
 
-	translator = Translator()
-	# transl = translator.translate(post_data['caption'], src='en', dest='ru')
-	transl = translator.translate(text=post_data['caption'], dest='ru').text
+	# transl = Translator().translate(post_data['caption'], dest='ru')
+	if post_data['caption']:
+		transl = '\n\nАвто-перевод:\n{}'.format(Translator().translate(text=post_data['caption'], dest='ru').text)
+	else:
+		transl = ''
 
-	text = '{}:\n\n{}\n\nАвто-перевод:\n{}\n\nСсылка на пост: {}'.format(post_data['author'], post_data['caption'], transl, post_data['url'])
+	text = '{}:\n\n{}{}\n\nСсылка на пост: {}'.format(post_data['author'], post_data['caption'], transl, post_data['url'])
+	video_title = 'Sum 41 Update - ' + post_data['caption'][:30] + '...'
 
-	if post_type == 'GraphImage':
-		attachment = upload_photo(session, post_data['media_urls'][0]['url'])
-		post_text(session, text, attachment)
+	if post_type == 'image':
+		attachments = upload_photo(session, post_data['media'][0]['url'])
 	
-	elif post_type == 'GraphVideo':
-		attachment = upload_video(session, post_data['media_urls'][0]['url'], 'Sum 41 Update - ' + post_data['caption'][:30] + '...', post_data['caption'])
-		post_text(session, text, attachment)
+	elif post_type == 'video':
+		attachments = upload_video(session, post_data['media'][0]['url'], video_title, post_data['caption'])
 
-	elif post_type == 'GraphSidecar':
+	elif post_type == 'external_video':
+		attachments = upload_external_video(session, post_data['media'][0]['url'], video_title, post_data['caption'])
+
+	elif post_type == 'multi':
 		attachments_arr = []
-
-		for media in post_data['media_urls']:
-			if media['type'] == 'GraphImage':
+		for media in post_data['media']:
+			if media['type'] == 'image':
 				attachment = upload_photo(session, media['url'])
 				attachments_arr.append(attachment)
-			elif media['type'] == 'GraphVideo':
-				attachment = upload_video(session, media['url'], 'Sum 41 Update - ' + post_data['caption'][:30] + '...', post_data['caption'])
+			elif media['type'] == 'video':
+				attachment = upload_video(session, media['url'], video_title, post_data['caption'])
 				attachments_arr.append(attachment)
-
 		attachments = ','.join(attachments_arr)
-		post_text(session, text, attachments)
+	
+	else: # just text
+		attachments = ''
+	
+	post_text(session, text, attachments)
 
 
 def post_text(session, message, attachments):
