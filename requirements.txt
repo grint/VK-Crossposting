@@ -41,7 +41,7 @@ dask==0.17.5
 datashape==0.5.4
 decorator==4.3.0
 distributed==1.21.8
-Django==1.10.8
+Django==1.11.29
 django-classy-tags==0.8.0
 django-sekizai==0.10.0
 docutils==0.14
